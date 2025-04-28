@@ -21,11 +21,14 @@ const IngredientsInput = () => {
 
     const result =
       action === 'library'
-        ? await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: false, quality: 1 })
-        : await ImagePicker.launchCameraAsync({ allowsEditing: false, quality: 1 })
+        ? await ImagePicker.launchImageLibraryAsync({ mediaTypes: ['images'], allowsEditing: false, quality: 0.5,base64: true })
+        : await ImagePicker.launchCameraAsync({ allowsEditing: false, quality: 0.5, base64: true })
 
     if (!result.canceled) {
-      nav.navigate('VerifyIngredients', { imageUri: result.assets[0].uri})
+      nav.navigate('VerifyIngredients', {
+        imageUri: result.assets[0].uri,
+        base64: result.assets[0].base64,
+      });
     }
   }
 
