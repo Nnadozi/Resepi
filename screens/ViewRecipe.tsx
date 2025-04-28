@@ -1,13 +1,16 @@
 import { StyleSheet, Text, View, ActivityIndicator, ScrollView } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { useRoute } from '@react-navigation/native'
+import { useNavigation, useRoute } from '@react-navigation/native'
 import Page from '../components/Page'
 import MyText from '../components/MyText'
 import Markdown from 'react-native-markdown-display'
+import { Button } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const apiKey = process.env.EXPO_PUBLIC_API_KEY
 
 const ViewRecipe = () => {
+  const nav = useNavigation()
   const route = useRoute()
   const { ingredients, userInput } = route.params || {}
 
@@ -40,8 +43,9 @@ const ViewRecipe = () => {
               {
                 role: 'user',
                 content: userInput
-                  ? `Generate a recipe using these ingredients: ${ingredients}. Note: The following corrections or missing ingredients were provided: ${userInput}.`
-                  : `Generate a recipe using these ingredients: ${ingredients}.`,
+                  ? `Generate a recipe using these ingredients: ${ingredients}. Note: The following corrections or missing ingredients were provided: ${userInput}.
+                  Show estimated cooking time and difficulty level as well.`
+                  : `Generate a recipe using these ingredients: ${ingredients}. Show estimated cooking time and difficulty level as well.`,
               },
             ],
           }),
@@ -72,7 +76,8 @@ const ViewRecipe = () => {
                 },
                 {
                   role: 'user',
-                  content: `The ingredients provided (${ingredients}) are insufficient to make a dish. Recommend a recipe with additional ingredients that can make a complete dish.`,
+                  content: `The ingredients provided (${ingredients}) are insufficient to make a dish. Recommend a recipe with additional ingredients that can make a complete dish.
+                    Show estimated cooking time and difficulty level as well.`,
                 },
               ],
             }),
@@ -97,6 +102,24 @@ const ViewRecipe = () => {
     generateRecipe()
   }, [ingredients, userInput])
 
+  const saveRecipe = async () => {
+    if (!recipe && !recommendedRecipe) return;
+
+    try {
+      const savedRecipes = JSON.parse((await AsyncStorage.getItem('savedRecipes')) || '[]');
+      const newRecipe = {
+        id: Date.now(), // Unique ID for the recipe
+        content: recipe || recommendedRecipe,
+      };
+
+      await AsyncStorage.setItem('savedRecipes', JSON.stringify([...savedRecipes, newRecipe]));
+      alert('Recipe saved successfully!');
+      nav.navigate('SavedRecipes');
+    } catch (error) {
+      console.error('Failed to save recipe:', error);
+      alert('Failed to save the recipe.');
+    }
+  }
   return (
     <Page>
       {loading ? (
@@ -120,6 +143,15 @@ const ViewRecipe = () => {
       ) : (
         <MyText>No ingredients provided.</MyText>
       )}
+      <MyText fontSize='small'>Note: AI output may not always be 100% correct</MyText>
+      {(recipe || recommendedRecipe) && (
+        <View style={{ marginTop: 20 }}>
+          <Button title="Save" onPress={saveRecipe} />
+          <View style={{ height: 10 }} /> 
+          <Button title="Thanks" onPress={() => nav.navigate('IngredientsInput')} />
+        </View>
+      )}
+
     </Page>
   )
 }
