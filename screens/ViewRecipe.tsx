@@ -108,7 +108,7 @@ const ViewRecipe = () => {
     try {
       const savedRecipes = JSON.parse((await AsyncStorage.getItem('savedRecipes')) || '[]');
       const newRecipe = {
-        id: Date.now(), // Unique ID for the recipe
+        id: Date.now(), 
         content: recipe || recommendedRecipe,
       };
 
@@ -143,7 +143,7 @@ const ViewRecipe = () => {
       ) : (
         <MyText>No ingredients provided.</MyText>
       )}
-      <MyText fontSize='small'>Note: AI output may not always be 100% correct</MyText>
+      <MyText fontSize='small'>⚠️ Recipes are AI-generated. Always double-check ingredients and instructions.</MyText>
       {(recipe || recommendedRecipe) && (
         <View style={{ marginTop: 20 }}>
           <Button title="Save" onPress={saveRecipe} />
