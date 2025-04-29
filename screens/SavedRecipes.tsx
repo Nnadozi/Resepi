@@ -1,8 +1,9 @@
-import { StyleSheet, Text, View, FlatList, Button } from 'react-native';
+import { StyleSheet, View, FlatList, Button, Alert, Share, TouchableOpacity } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MyText from '../components/MyText';
 import Page from '../components/Page';
+import * as Clipboard from 'expo-clipboard';
 
 const SavedRecipes = () => {
   const [recipes, setRecipes] = useState([]);
@@ -20,9 +21,24 @@ const SavedRecipes = () => {
     try {
       await AsyncStorage.removeItem('savedRecipes');
       setRecipes([]);
-      alert('All recipes cleared!');
+      Alert.alert('Success', 'All recipes cleared!');
     } catch (error) {
       console.error('Failed to clear recipes:', error);
+    }
+  };
+
+  const copyToClipboard = async (content: any) => {
+    await Clipboard.setStringAsync(content);
+    Alert.alert('Copied to Clipboard', 'The recipe has been copied to your clipboard.');
+  };
+
+  const shareRecipe = async (content: any) => {
+    try {
+      await Share.share({
+        message: content,title: 'Check out this recipe!',
+      });
+    } catch (error) {
+      console.error('Failed to share recipe:', error);
     }
   };
 
@@ -40,6 +56,20 @@ const SavedRecipes = () => {
           renderItem={({ item }) => (
             <View style={styles.recipeContainer}>
               <MyText>{item.content}</MyText>
+              <View style={styles.actionButtons}>
+                <TouchableOpacity
+                  style={styles.actionButton}
+                  onPress={() => copyToClipboard(item.content)}
+                >
+                  <MyText style={styles.actionButtonText}>Copy</MyText>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.actionButton}
+                  onPress={() => shareRecipe(item.content)}
+                >
+                  <MyText style={styles.actionButtonText}>Share</MyText>
+                </TouchableOpacity>
+              </View>
             </View>
           )}
         />
@@ -60,5 +90,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
+  },
+  actionButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  actionButton: {
+    backgroundColor: '#007BFF',
+    padding: 10,
+    borderRadius: 5,
+  },
+  actionButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
   },
 });

@@ -1,30 +1,31 @@
-import { StyleSheet, Text, View, ActivityIndicator, ScrollView } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { useNavigation, useRoute } from '@react-navigation/native'
-import Page from '../components/Page'
-import MyText from '../components/MyText'
-import Markdown from 'react-native-markdown-display'
-import { Button } from 'react-native'
+import { StyleSheet, Text, View, ActivityIndicator, ScrollView, Alert, Share } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import Page from '../components/Page';
+import MyText from '../components/MyText';
+import Markdown from 'react-native-markdown-display';
+import { Button } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Clipboard from 'expo-clipboard';
 
-const apiKey = process.env.EXPO_PUBLIC_API_KEY
+const apiKey = process.env.EXPO_PUBLIC_API_KEY;
 
 const ViewRecipe = () => {
-  const nav = useNavigation()
-  const route = useRoute()
-  const { ingredients, userInput } = route.params || {}
+  const nav = useNavigation();
+  const route = useRoute();
+  const { ingredients, userInput } = route.params || {};
 
-  const [recipe, setRecipe] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [insufficientIngredients, setInsufficientIngredients] = useState(false)
-  const [recommendedRecipe, setRecommendedRecipe] = useState<string | null>(null)
+  const [recipe, setRecipe] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [insufficientIngredients, setInsufficientIngredients] = useState(false);
+  const [recommendedRecipe, setRecommendedRecipe] = useState<string | null>(null);
 
   useEffect(() => {
     const generateRecipe = async () => {
-      if (!ingredients) return
+      if (!ingredients) return;
 
-      setLoading(true)
+      setLoading(true);
       try {
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
@@ -49,18 +50,16 @@ const ViewRecipe = () => {
               },
             ],
           }),
-        })
+        });
 
-        const data = await response.json()
-        if (!response.ok) throw new Error(data.error?.message || 'Failed to generate recipe.')
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error?.message || 'Failed to generate recipe.');
 
-        const reply = data.choices?.[0]?.message?.content
+        const reply = data.choices?.[0]?.message?.content;
 
-        // Check if the ingredients are insufficient
         if (reply?.toLowerCase().includes('not enough ingredients')) {
-          setInsufficientIngredients(true)
+          setInsufficientIngredients(true);
 
-          // Recommend a recipe with additional ingredients
           const recommendationResponse = await fetch('https://api.openai.com/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -81,26 +80,26 @@ const ViewRecipe = () => {
                 },
               ],
             }),
-          })
+          });
 
-          const recommendationData = await recommendationResponse.json()
-          if (!recommendationResponse.ok) throw new Error(recommendationData.error?.message || 'Failed to recommend a recipe.')
+          const recommendationData = await recommendationResponse.json();
+          if (!recommendationResponse.ok) throw new Error(recommendationData.error?.message || 'Failed to recommend a recipe.');
 
-          const recommendationReply = recommendationData.choices?.[0]?.message?.content
-          setRecommendedRecipe(recommendationReply || 'No recommendation available.')
+          const recommendationReply = recommendationData.choices?.[0]?.message?.content;
+          setRecommendedRecipe(recommendationReply || 'No recommendation available.');
         } else {
-          setRecipe(reply || 'No recipe generated.')
+          setRecipe(reply || 'No recipe generated.');
         }
       } catch (e: any) {
-        console.error(e)
-        setError('Failed to generate recipe.')
+        console.error(e);
+        setError('Failed to generate recipe.');
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    generateRecipe()
-  }, [ingredients, userInput])
+    generateRecipe();
+  }, [ingredients, userInput]);
 
   const saveRecipe = async () => {
     if (!recipe && !recommendedRecipe) return;
@@ -108,7 +107,7 @@ const ViewRecipe = () => {
     try {
       const savedRecipes = JSON.parse((await AsyncStorage.getItem('savedRecipes')) || '[]');
       const newRecipe = {
-        id: Date.now(), 
+        id: Date.now(),
         content: recipe || recommendedRecipe,
       };
 
@@ -119,7 +118,25 @@ const ViewRecipe = () => {
       console.error('Failed to save recipe:', error);
       alert('Failed to save the recipe.');
     }
-  }
+  };
+
+  const copyToClipboard = async (content: string) => {
+    await Clipboard.setStringAsync(content);
+    Alert.alert('Copied to Clipboard', 'The recipe has been copied to your clipboard.');
+  };
+
+  const shareRecipe = async (content: string) => {
+    try {
+      await Share.share({
+        message: content,
+      });
+    } catch (error) {
+      console.error('Failed to share recipe:', error);
+    }
+  };
+
+  const displayedRecipe = recipe || recommendedRecipe;
+
   return (
     <Page>
       {loading ? (
@@ -143,24 +160,27 @@ const ViewRecipe = () => {
       ) : (
         <MyText>No ingredients provided.</MyText>
       )}
-      <MyText fontSize='small'>⚠️ Recipes are AI-generated. Always double-check ingredients and instructions.</MyText>
-      {(recipe || recommendedRecipe) && (
+      <MyText fontSize="small">⚠️ Recipes are AI-generated. Always double-check ingredients and instructions.</MyText>
+      {displayedRecipe && (
         <View style={{ marginTop: 20 }}>
           <Button title="Save" onPress={saveRecipe} />
-          <View style={{ height: 10 }} /> 
+          <View style={{ height: 10 }} />
+          <Button title="Copy" onPress={() => copyToClipboard(displayedRecipe)} />
+          <View style={{ height: 10 }} />
+          <Button title="Share" onPress={() => shareRecipe(displayedRecipe)} />
+          <View style={{ height: 10 }} />
           <Button title="Thanks" onPress={() => nav.navigate('IngredientsInput')} />
         </View>
       )}
-
     </Page>
-  )
-}
+  );
+};
 
-export default ViewRecipe
+export default ViewRecipe;
 
 const styles = StyleSheet.create({
   recipeContainer: {
     marginTop: 20,
     paddingHorizontal: 10,
   },
-})
+});
