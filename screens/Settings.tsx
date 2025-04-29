@@ -5,7 +5,7 @@ const Settings = () => {
   return (
     <View>
       <Text>Settings</Text>
-      <Text>Theme, language, PP/TOS, Feedback, Rate/Review, Version</Text>
+      <Text>Theme, language, PP/TOS, Rate/Review, Feedback, Version</Text>
     </View>
   )
 }

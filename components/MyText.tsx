@@ -5,6 +5,7 @@ interface MyTextProps {
   children: React.ReactNode
   bold?: boolean;
   fontSize?: 'small' | 'normal' | 'large' | 'XL'
+  maxWidth?: string;
 }
 
 const fontSizes = {
@@ -14,9 +15,9 @@ const fontSizes = {
   XL: 30,
 }
 
-const MyText = ({ children, bold, fontSize = 'normal' }: MyTextProps) => {
+const MyText = ({ children, bold, fontSize = 'normal', maxWidth }: MyTextProps) => {
     return (
-      <Text style={[{ fontSize: fontSizes[fontSize] }, bold && { fontWeight: 'bold' }]}>
+      <Text style={[{ fontSize: fontSizes[fontSize] }, bold && { fontWeight: 'bold' },{maxWidth:maxWidth}]}>
         {children}
       </Text>
     )
