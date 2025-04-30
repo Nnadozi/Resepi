@@ -1,34 +1,37 @@
-import { StyleSheet, Text, View, Button, Image, ActivityIndicator, TextInput } from 'react-native'
-import React, { useEffect, useState } from 'react'
-import { useNavigation, useRoute } from '@react-navigation/native'
-import Page from '../components/Page'
-import MyText from '../components/MyText'
+import { StyleSheet, Text, View, Image, ActivityIndicator } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
+import Page from '../components/Page';
+import MyText from '../components/MyText';
+import MyButton from '../components/MyButton';
 
-const apiKey = process.env.EXPO_PUBLIC_API_KEY
+const apiKey = process.env.EXPO_PUBLIC_API_KEY;
 
 const VerifyIngredients = () => {
-  const nav = useNavigation()
-  const route = useRoute()
-  const { imageUri, base64 } = route.params || {}
-  const [ingredients, setIngredients] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [showInput, setShowInput] = useState(false)
-  const [userInput, setUserInput] = useState<string>('')
+  const nav = useNavigation();
+  const route = useRoute();
+  const { imageUri, base64 } = route.params || {};
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [noIngredientsFound, setNoIngredientsFound] = useState(false); 
 
-  const createRecipe = () => {
-    nav.navigate('ViewRecipe',{ ingredients, userInput })
-  }
+  useFocusEffect(
+    React.useCallback(() => {
+      setLoading(false);
+      setError(null);
+      setNoIngredientsFound(false);
+    }, [])
+  );
 
   useEffect(() => {
     async function examineImage() {
-      if (!base64) return
-      setLoading(true)
+      if (!base64) return;
+      setLoading(true);
       try {
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${apiKey}`,
+            Authorization: `Bearer ${apiKey}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
@@ -43,77 +46,71 @@ const VerifyIngredients = () => {
                 role: 'user',
                 content: [
                   { type: 'text', text: 'List the food ingredients shown in this image. Only output a simple comma-separated list, no explanations.' },
-                  { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${base64}` } }
+                  { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${base64}` } },
                 ],
               },
             ],
           }),
-        })
+        });
 
-        const data = await response.json()
-        if (!response.ok) throw new Error(data.error?.message || 'Unknown error')
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error?.message || 'Unknown error');
 
-        const reply = data.choices?.[0]?.message?.content
-        setIngredients(reply || 'No ingredients found.')
+        const reply = data.choices?.[0]?.message?.content;
+
+        if (reply?.toLowerCase().includes("i don't see any food ingredients")) {
+          setNoIngredientsFound(true); 
+        } else {
+          nav.navigate('IngredientsView', { ingredients: reply }); 
+        }
       } catch (e: any) {
-        console.error(e)
-        setError('Failed to analyze image.')
+        console.error(e);
+        setError('Failed to analyze image.');
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
+    examineImage();
+  }, []);
 
-    examineImage()
-  }, [])
-
-  const isProceedDisabled = !ingredients || ingredients.toLowerCase().includes("no ingredients") || ingredients.toLowerCase().includes("don't see any food ingredients")
+  const handleCancel = () => {
+    nav.goBack();
+  };
 
   return (
     <Page>
-      <MyText>Verify Ingredients</MyText>
+      <MyText bold fontSize="large">Verifying Ingredients...</MyText>
       {imageUri ? (
         <Image source={{ uri: imageUri }} style={styles.image} />
       ) : (
         <MyText>No image selected</MyText>
       )}
       {loading ? (
-        <ActivityIndicator size="large" color="#000" style={{ marginVertical: 20 }} />
+        <ActivityIndicator size="large" color="#5b9ef0" style={{ marginTop: '7.5%', transform: [{ scale: 1.25 }] }} />
       ) : error ? (
         <MyText>{error}</MyText>
-      ) : ingredients ? (
-        <MyText>Ingredients detected: {ingredients}</MyText>
-      ) : (
-        <MyText>No ingredients detected.</MyText>
-      )}
-      {showInput && (
-        <TextInput
-          style={styles.input}
-          placeholder="Enter missing or corrected ingredients"
-          value={userInput}
-          onChangeText={setUserInput}
-        />
-      )}
-      <Button title="Proceed" onPress={createRecipe} disabled={isProceedDisabled && !userInput} />
-      <Button title="Something's Wrong" disabled={loading || !ingredients || isProceedDisabled } onPress={() => setShowInput(true)} />
-      <Button title="Back" onPress={nav.goBack} />
+      ) : noIngredientsFound ? ( 
+        <>
+          <MyText style={{ marginVertical: '5%' }}>
+            No food ingredients were found in this image. 
+            Please try again.
+          </MyText>
+          <MyButton width="100%" title="Back" onPress={handleCancel} />
+        </>
+      ) : null}
     </Page>
-  )
-}
+  );
+};
 
-export default VerifyIngredients
+export default VerifyIngredients;
 
 const styles = StyleSheet.create({
   image: {
-    width: '100%',
-    height: 300,
-    resizeMode: 'contain',
-    marginVertical: 20,
+    width: '90%',
+    height: undefined,
+    resizeMode: 'cover',
+    aspectRatio: 1,
+    marginTop: '5%',
+    borderRadius: 30,
   },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
-    padding: 10,
-    marginVertical: 10,
-  },
-})
+});

@@ -4,9 +4,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import MyText from '../components/MyText';
 import Page from '../components/Page';
 import * as Clipboard from 'expo-clipboard';
+import { useNavigation } from '@react-navigation/native';
 
 const SavedRecipes = () => {
   const [recipes, setRecipes] = useState([]);
+  const nav = useNavigation()
 
   const loadRecipes = async () => {
     try {
@@ -55,17 +57,21 @@ const SavedRecipes = () => {
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
             <View style={styles.recipeContainer}>
-              <MyText>{item.content}</MyText>
+              {typeof item.content === 'string' ? (
+                <MyText>{item.content}</MyText> 
+              ) : (
+                <MyText>{JSON.stringify(item.content, null, 2)}</MyText>
+              )}
               <View style={styles.actionButtons}>
                 <TouchableOpacity
                   style={styles.actionButton}
-                  onPress={() => copyToClipboard(item.content)}
+                  onPress={() => copyToClipboard(typeof item.content === 'string' ? item.content : JSON.stringify(item.content))}
                 >
                   <MyText style={styles.actionButtonText}>Copy</MyText>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.actionButton}
-                  onPress={() => shareRecipe(item.content)}
+                  onPress={() => shareRecipe(typeof item.content === 'string' ? item.content : JSON.stringify(item.content))}
                 >
                   <MyText style={styles.actionButtonText}>Share</MyText>
                 </TouchableOpacity>
@@ -77,6 +83,7 @@ const SavedRecipes = () => {
         <MyText>No saved recipes found.</MyText>
       )}
       <Button title="Clear All Recipes" onPress={clearRecipes} />
+      <Button title="Back" onPress={() => nav.navigate("IngredientsInput")} />
     </Page>
   );
 };

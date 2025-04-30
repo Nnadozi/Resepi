@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, ViewStyle } from 'react-native'
+import { SafeAreaView, StyleSheet, Text, View, ViewStyle } from 'react-native'
 import React from 'react'
 
 interface PageProps {
@@ -10,9 +10,13 @@ interface PageProps {
 const Page = (props: PageProps) => {
   const defaultPadding = '5%';  
   return (
-    <View style={[styles.con, props.style, { padding: props.padding || defaultPadding }]}>
+    <SafeAreaView style={[
+      styles.con, 
+      { padding: props.padding || defaultPadding},
+      props.style, 
+      ]}>
         {props.children}
-    </View>
+    </SafeAreaView>
   )
 }
 

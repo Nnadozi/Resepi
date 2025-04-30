@@ -1,25 +1,47 @@
-import { StyleSheet, Text, View, ActivityIndicator, ScrollView, Alert, Share } from 'react-native';
+import { StyleSheet, View, ActivityIndicator, ScrollView, Alert, Share } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Page from '../components/Page';
 import MyText from '../components/MyText';
-import Markdown from 'react-native-markdown-display';
-import { Button } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Clipboard from 'expo-clipboard';
+import MyButton from '../components/MyButton';
+import { Icon } from '@rneui/base';
 
 const apiKey = process.env.EXPO_PUBLIC_API_KEY;
+
+const formatRecipe = (data: any) => {
+  return `🍽️ Recipe: ${data.recipe}
+⏱️ Cooking Time: ${data.cookingTime}
+🔥 Difficulty: ${data.difficulty}
+
+📝 Ingredients:
+${data.ingredients.map((item: string) => `- ${item}`).join('\n')}
+
+👨‍🍳 Instructions:
+${data.instructions.map((step: string, i: number) => `${i + 1}. ${step}`).join('\n')}
+`;
+};
 
 const ViewRecipe = () => {
   const nav = useNavigation();
   const route = useRoute();
   const { ingredients, userInput } = route.params || {};
 
-  const [recipe, setRecipe] = useState<string | null>(null);
+  const [recipeData, setRecipeData] = useState<any>(null); 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [insufficientIngredients, setInsufficientIngredients] = useState(false);
-  const [recommendedRecipe, setRecommendedRecipe] = useState<string | null>(null);
+
+  const loadingPhrases = [
+    'Cooking up your recipe...',
+    'Mixing ingredients for your dish...',
+    'Preparing your delicious recipe...',
+    'Whipping up something tasty...',
+    'Creating your culinary masterpiece...',
+  ];
+
+  const randomPhrase = loadingPhrases[Math.floor(Math.random() * loadingPhrases.length)];
 
   useEffect(() => {
     const generateRecipe = async () => {
@@ -34,7 +56,7 @@ const ViewRecipe = () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            model: 'gpt-4o-mini',
+            model: 'gpt-4.1-nano',
             messages: [
               {
                 role: 'system',
@@ -43,10 +65,15 @@ const ViewRecipe = () => {
               },
               {
                 role: 'user',
-                content: userInput
-                  ? `Generate a recipe using these ingredients: ${ingredients}. Note: The following corrections or missing ingredients were provided: ${userInput}.
-                  Show estimated cooking time and difficulty level as well.`
-                  : `Generate a recipe using these ingredients: ${ingredients}. Show estimated cooking time and difficulty level as well.`,
+                content: `Generate a recipe using these ingredients: ${ingredients}. Note: The following corrections or missing ingredients IF provided: ${userInput}.
+                 Return the output in a JSON like this: 
+                 {
+                  "recipe": "Name of the recipe here", 
+                  "cookingTime": "Estimated cooking time range here (Ex: 30-45 minutes)", 
+                  "difficulty": "Difficulty level here (Easy / Medium / Hard)",
+                  "ingredients": [list of ingredients in array],
+                  "instructions": [list of instructions in array]
+                 }`,
               },
             ],
           }),
@@ -67,7 +94,7 @@ const ViewRecipe = () => {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-              model: 'gpt-4o-mini',
+              model: 'gpt-4.1-nano',
               messages: [
                 {
                   role: 'system',
@@ -76,7 +103,14 @@ const ViewRecipe = () => {
                 {
                   role: 'user',
                   content: `The ingredients provided (${ingredients}) are insufficient to make a dish. Recommend a recipe with additional ingredients that can make a complete dish.
-                    Show estimated cooking time and difficulty level as well.`,
+                    Return the output in a JSON like this: 
+                    {
+                      "recipe": "Name of the recipe here", 
+                      "cookingTime": "Estimated cooking time range here (Ex: 30-45 minutes)", 
+                      "difficulty": "Difficulty level here (Easy / Medium / Hard)",
+                      "ingredients": [list of ingredients in array, but (additional) in front of additional ingredients],
+                      "instructions": [list of instructions in array]
+                    }`,
                 },
               ],
             }),
@@ -86,9 +120,9 @@ const ViewRecipe = () => {
           if (!recommendationResponse.ok) throw new Error(recommendationData.error?.message || 'Failed to recommend a recipe.');
 
           const recommendationReply = recommendationData.choices?.[0]?.message?.content;
-          setRecommendedRecipe(recommendationReply || 'No recommendation available.');
+          setRecipeData(JSON.parse(recommendationReply)); 
         } else {
-          setRecipe(reply || 'No recipe generated.');
+          setRecipeData(JSON.parse(reply)); 
         }
       } catch (e: any) {
         console.error(e);
@@ -102,15 +136,15 @@ const ViewRecipe = () => {
   }, [ingredients, userInput]);
 
   const saveRecipe = async () => {
-    if (!recipe && !recommendedRecipe) return;
-
+    if (!recipeData) return;
+  
     try {
       const savedRecipes = JSON.parse((await AsyncStorage.getItem('savedRecipes')) || '[]');
       const newRecipe = {
         id: Date.now(),
-        content: recipe || recommendedRecipe,
+        content: formatRecipe(recipeData), 
       };
-
+  
       await AsyncStorage.setItem('savedRecipes', JSON.stringify([...savedRecipes, newRecipe]));
       alert('Recipe saved successfully!');
       nav.navigate('SavedRecipes');
@@ -120,56 +154,76 @@ const ViewRecipe = () => {
     }
   };
 
-  const copyToClipboard = async (content: string) => {
-    await Clipboard.setStringAsync(content);
-    Alert.alert('Copied to Clipboard', 'The recipe has been copied to your clipboard.');
+  const copyToClipboard = async () => {
+    if (!recipeData) return;
+    const formatted = formatRecipe(recipeData);
+    await Clipboard.setStringAsync(formatted);
   };
 
-  const shareRecipe = async (content: string) => {
+  const shareRecipe = async () => {
+    if (!recipeData) return;
     try {
+      const formatted = formatRecipe(recipeData);
       await Share.share({
-        message: content,
+        message: formatted,
       });
     } catch (error) {
       console.error('Failed to share recipe:', error);
     }
   };
 
-  const displayedRecipe = recipe || recommendedRecipe;
-
   return (
     <Page>
       {loading ? (
         <>
-          <MyText>Generating recipe...</MyText>
-          <ActivityIndicator size="large" color="#0000ff" style={{ marginVertical: 20 }} />
+          <MyText bold>{randomPhrase}</MyText>
+          <ActivityIndicator size="large" color="#5b9ef0" style={{ marginVertical: '5%' }} />
         </>
       ) : error ? (
         <MyText>{error}</MyText>
       ) : insufficientIngredients ? (
-        <ScrollView style={styles.recipeContainer}>
-          <MyText>The given ingredients are insufficient to make a dish.</MyText>
-          <MyText>Recommended Recipe:</MyText>
-          <Markdown>{recommendedRecipe}</Markdown>
-        </ScrollView>
-      ) : recipe ? (
-        <ScrollView style={styles.recipeContainer}>
-          <MyText>Generated Recipe:</MyText>
-          <Markdown>{recipe}</Markdown>
+        <MyText>No sufficient ingredients to generate a recipe.</MyText>
+      ) : recipeData ? (
+        <ScrollView style={styles.recipeContainer} contentContainerStyle={{paddingBottom: '10%'}}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',width:"100%"}}>
+            <MyText bold fontSize='large'>Enjoy!</MyText>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              <Icon name='copy' type='feather' onPress={copyToClipboard} />
+              <Icon name="share" type='entypo' onPress={shareRecipe} />
+            </View>
+          </View>
+          <MyText>Recipe: {recipeData.recipe}</MyText>
+          <View style = {{marginTop:"3%"}}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap:'2%' }}>
+              <Icon name='clock' type='feather' size={18} />
+              <MyText fontSize="small">Cooking Time: {recipeData.cookingTime}</MyText>
+            </View>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap:'2%' }}>
+              <Icon name='flame' type='ionicon' size={18} />
+              <MyText fontSize="small">Difficulty: {recipeData.difficulty}</MyText>
+            </View>
+          </View>
+          <MyText bold style={{ marginTop: "3%" }}>Ingredients:</MyText>
+          {recipeData.ingredients.map((ingredient: string, index: number) => (
+            <MyText style={{marginVertical:"1%"}} key={index}>• {ingredient}</MyText>
+          ))}
+          <MyText bold style={{ marginTop: "3%" }}>
+            Instructions:
+          </MyText>
+          {recipeData.instructions.map((instruction: string, index: number) => (
+            <MyText style={{marginVertical:"1%"}} key={index}>{index + 1}. {instruction}</MyText>
+          ))}
         </ScrollView>
       ) : (
         <MyText>No ingredients provided.</MyText>
       )}
-      <MyText fontSize="small">⚠️ Recipes are AI-generated. Always double-check ingredients and instructions.</MyText>
-      {displayedRecipe && (
-        <View style={{ marginTop: 20 }}>
-          <Button title="Save" onPress={saveRecipe} />
-          <View style={{ height: 10 }} />
-          <Button title="Copy" onPress={() => copyToClipboard(displayedRecipe)} />
-          <View style={{ height: 10 }} />
-          <Button title="Share" onPress={() => shareRecipe(displayedRecipe)} />
-          <View style={{ height: 10 }} />
-          <Button title="Thanks" onPress={() => nav.navigate('IngredientsInput')} />
+      {recipeData && (
+        <View style={styles.bottomButtons}>
+          <MyText style={{ color: 'gray', transform: [{ scale: 0.8 }] }} fontSize={3} textAlign="center">
+            ⚠️ Recipes are AI-generated. Always double-check ingredients and instructions.
+          </MyText>
+          <MyButton style={{ marginTop: '2.5%' }} title="Thanks!" onPress={() => nav.navigate('IngredientsInput')} />
+          <MyButton iconName="save" style={{ marginTop: '2.5%' }} title="Save to History" onPress={saveRecipe} />
         </View>
       )}
     </Page>
@@ -180,7 +234,11 @@ export default ViewRecipe;
 
 const styles = StyleSheet.create({
   recipeContainer: {
-    marginTop: 20,
-    paddingHorizontal: 10,
+    marginTop: '7.5%',
+  },
+  bottomButtons: {
+    marginTop: '2%',
+    width: '100%',
+    marginBottom: '2%',
   },
 });

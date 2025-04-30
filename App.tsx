@@ -10,7 +10,7 @@ export default function App() {
   const Stack = createNativeStackNavigator()
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator screenOptions={{ headerShown: false, gestureEnabled:false}}>
         <Stack.Screen name='MainNav' component={MainNav} />
         <Stack.Screen name='AuthNav' component={AuthNav} />
       </Stack.Navigator>

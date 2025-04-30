@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, View, ViewStyle } from 'react-native'
 import React from 'react'
 
 interface MyTextProps {
@@ -6,6 +6,8 @@ interface MyTextProps {
   bold?: boolean;
   fontSize?: 'small' | 'normal' | 'large' | 'XL'
   maxWidth?: string;
+  style?:ViewStyle
+  textAlign?:string;
 }
 
 const fontSizes = {
@@ -15,9 +17,14 @@ const fontSizes = {
   XL: 30,
 }
 
-const MyText = ({ children, bold, fontSize = 'normal', maxWidth }: MyTextProps) => {
+const MyText = ({ children, bold, fontSize = 'normal', maxWidth,style, textAlign }: MyTextProps) => {
     return (
-      <Text style={[{ fontSize: fontSizes[fontSize] }, bold && { fontWeight: 'bold' },{maxWidth:maxWidth}]}>
+      <Text style={[
+        style,
+        { fontSize: fontSizes[fontSize] }, 
+        bold && { fontWeight: 'bold' },
+        {maxWidth:maxWidth},{textAlign:textAlign}
+        ]}>
         {children}
       </Text>
     )

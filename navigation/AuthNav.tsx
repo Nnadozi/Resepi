@@ -7,7 +7,7 @@ import SignUp from '../screens/SignUp';
 const AuthNav = () => {
   const Stack = createNativeStackNavigator()
   return (
-    <Stack.Navigator screenOptions={{headerShown: false}}>
+    <Stack.Navigator screenOptions={{headerShown: false, gestureEnabled:false}}>
         <Stack.Screen name="SignUp" component={SignUp}/>
         <Stack.Screen name="Login" component={Login}/>
     </Stack.Navigator>
