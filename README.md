@@ -1,2 +1,2 @@
 # Resepi
-AI Recipe Generator (In progress)
+Take a picture of ingredients and get a recipe
