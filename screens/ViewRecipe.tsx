@@ -192,7 +192,7 @@ const ViewRecipe = () => {
               <Icon name="share" type='entypo' onPress={shareRecipe} />
             </View>
           </View>
-          <MyText>Recipe: {recipeData.recipe}</MyText>
+          <MyText style={{marginVertical:"1%"}}>Recipe: {recipeData.recipe}</MyText>
           <View style = {{marginTop:"3%"}}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap:'2%' }}>
               <Icon name='clock' type='feather' size={18} />

@@ -37,7 +37,7 @@ const IngredientsView = () => {
           multiline
         />
       </View>
-      <View style={{ width: '100%' }}>
+      <View style={{ width: '100%', marginBottom: '3%' }}>
         <MyButton style={{marginTop:'2.5%'}} width="100%" title="Proceed" onPress={generateRecipe} />
         <MyButton iconName='cancel' style={{marginTop:'2.5%'}} width="100%" title="Cancel" onPress={() => nav.navigate('IngredientsInput')} />
       </View>
@@ -75,5 +75,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     marginTop: '2%',
+
   },
 });
