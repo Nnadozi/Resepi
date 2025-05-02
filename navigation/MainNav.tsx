@@ -7,6 +7,7 @@ import IngredientsInput from '../screens/IngredientsInput'
 import VerifyIngredients from '../screens/VerifyIngredients'
 import ViewRecipe from '../screens/ViewRecipe'
 import IngredientsView from '../screens/IngredientsView'
+import ViewSavedRecipe from '../screens/ViewSavedRecipe'
 
 const MainNav = () => {
   const Stack = createNativeStackNavigator()
@@ -17,6 +18,7 @@ const MainNav = () => {
       <Stack.Screen name="IngredientsView" component={IngredientsView}/>
       <Stack.Screen name="ViewRecipe" component={ViewRecipe}/>
       <Stack.Screen name="SavedRecipes" component={SavedRecipes}/>
+      <Stack.Screen name="ViewSavedRecipe" component={ViewSavedRecipe}/>
       <Stack.Screen name="Settings" component={Settings}/>
     </Stack.Navigator>
   )

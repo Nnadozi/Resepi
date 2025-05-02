@@ -1,9 +1,7 @@
-1. Finish making UI for SavedRecipes 
-2. Make the AI realize when additional ingredients are needed
-3. Try serverless functions / local ai (With Sumitt as well)
-4. Condense API process? 
-5. Implement theme and language
-6. Look over code
-7. Camera permission UI
-8. Next steps (publish?)
+1. Try serverless functions / local ai (With Sumitt as well)
+
+- finish localization (add more languages + add language detection logic)
+- Finshing themeing (disable on camera screen)
+- Polish UI
+- Next steps (more features + publish?)
 

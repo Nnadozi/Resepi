@@ -5,10 +5,12 @@ import MyText from '../components/MyText';
 import Page from '../components/Page';
 import * as Clipboard from 'expo-clipboard';
 import { useNavigation } from '@react-navigation/native';
+import { Icon } from '@rneui/base';
+import RecipePreview from '../components/RecipePreview';
 
 const SavedRecipes = () => {
   const [recipes, setRecipes] = useState([]);
-  const nav = useNavigation()
+  const nav = useNavigation();
 
   const loadRecipes = async () => {
     try {
@@ -19,28 +21,14 @@ const SavedRecipes = () => {
     }
   };
 
-  const clearRecipes = async () => {
+  const deleteRecipe = async (id: number) => {
     try {
-      await AsyncStorage.removeItem('savedRecipes');
-      setRecipes([]);
-      Alert.alert('Success', 'All recipes cleared!');
+      const updatedRecipes = recipes.filter((recipe) => recipe.id !== id);
+      setRecipes(updatedRecipes);
+      await AsyncStorage.setItem('savedRecipes', JSON.stringify(updatedRecipes));
+      Alert.alert('Success', 'Recipe deleted successfully!');
     } catch (error) {
-      console.error('Failed to clear recipes:', error);
-    }
-  };
-
-  const copyToClipboard = async (content: any) => {
-    await Clipboard.setStringAsync(content);
-    Alert.alert('Copied to Clipboard', 'The recipe has been copied to your clipboard.');
-  };
-
-  const shareRecipe = async (content: any) => {
-    try {
-      await Share.share({
-        message: content,title: 'Check out this recipe!',
-      });
-    } catch (error) {
-      console.error('Failed to share recipe:', error);
+      console.error('Failed to delete recipe:', error);
     }
   };
 
@@ -50,40 +38,30 @@ const SavedRecipes = () => {
 
   return (
     <Page>
-      <MyText>Saved Recipes</MyText>
-      {recipes.length > 0 ? (
-        <FlatList
-          data={recipes}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <View style={styles.recipeContainer}>
-              {typeof item.content === 'string' ? (
-                <MyText>{item.content}</MyText> 
-              ) : (
-                <MyText>{JSON.stringify(item.content, null, 2)}</MyText>
-              )}
-              <View style={styles.actionButtons}>
-                <TouchableOpacity
-                  style={styles.actionButton}
-                  onPress={() => copyToClipboard(typeof item.content === 'string' ? item.content : JSON.stringify(item.content))}
-                >
-                  <MyText style={styles.actionButtonText}>Copy</MyText>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.actionButton}
-                  onPress={() => shareRecipe(typeof item.content === 'string' ? item.content : JSON.stringify(item.content))}
-                >
-                  <MyText style={styles.actionButtonText}>Share</MyText>
-                </TouchableOpacity>
-              </View>
-            </View>
-          )}
-        />
-      ) : (
-        <MyText>No saved recipes found.</MyText>
-      )}
-      <Button title="Clear All Recipes" onPress={clearRecipes} />
-      <Button title="Back" onPress={() => nav.navigate("IngredientsInput")} />
+      <View style={styles.topRow}>
+        <Icon size={25} onPress={() => nav.navigate("IngredientsInput")} name="arrow-back" />
+        <MyText style={{ alignSelf: 'center' }} fontSize="large" bold>Saved Recipes</MyText>
+        <View />
+      </View>
+      <View style={styles.mainCon}>
+        {recipes.length > 0 ? (
+          <FlatList
+            data={recipes}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => (
+              <RecipePreview
+                recipeTitle={item.content.recipe}
+                cookingTime={item.content.cookingTime}
+                difficulty={item.content.difficulty}
+                onPress={() => nav.navigate("ViewSavedRecipe", { recipe: item.content })}
+                onDelete={() => deleteRecipe(item.id)} 
+              />
+            )}
+          />
+        ) : (
+          <MyText color="gray">You haven't saved any recipes yet.</MyText>
+        )}
+      </View>
     </Page>
   );
 };
@@ -91,25 +69,17 @@ const SavedRecipes = () => {
 export default SavedRecipes;
 
 const styles = StyleSheet.create({
-  recipeContainer: {
-    marginVertical: 10,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 5,
+  mainCon: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    width:"100%",
+    flex:0.92
   },
-  actionButtons: {
+  topRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 10,
-  },
-  actionButton: {
-    backgroundColor: '#007BFF',
-    padding: 10,
-    borderRadius: 5,
-  },
-  actionButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom:"5%"
   },
 });

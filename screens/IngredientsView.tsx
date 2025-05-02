@@ -38,7 +38,7 @@ const IngredientsView = () => {
         />
       </View>
       <View style={{ width: '100%', marginBottom: '3%' }}>
-        <MyButton style={{marginTop:'2.5%'}} width="100%" title="Proceed" onPress={generateRecipe} />
+        <MyButton marginTop='2.5%' width="100%" title="Proceed" onPress={generateRecipe} />
         <MyButton iconName='cancel' style={{marginTop:'2.5%'}} width="100%" title="Cancel" onPress={() => nav.navigate('IngredientsInput')} />
       </View>
     </Page>

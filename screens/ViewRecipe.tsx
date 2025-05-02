@@ -1,4 +1,4 @@
-import { StyleSheet, View, ActivityIndicator, ScrollView, Alert, Share } from 'react-native';
+import { StyleSheet, View, ActivityIndicator, ScrollView, Share } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Page from '../components/Page';
@@ -19,8 +19,7 @@ const formatRecipe = (data: any) => {
 ${data.ingredients.map((item: string) => `- ${item}`).join('\n')}
 
 👨‍🍳 Instructions:
-${data.instructions.map((step: string, i: number) => `${i + 1}. ${step}`).join('\n')}
-`;
+${data.instructions.map((step: string, i: number) => `${i + 1}. ${step}`).join('\n')}`;
 };
 
 const ViewRecipe = () => {
@@ -28,10 +27,9 @@ const ViewRecipe = () => {
   const route = useRoute();
   const { ingredients, userInput } = route.params || {};
 
-  const [recipeData, setRecipeData] = useState<any>(null); 
+  const [recipeData, setRecipeData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [insufficientIngredients, setInsufficientIngredients] = useState(false);
 
   const loadingPhrases = [
     'Cooking up your recipe...',
@@ -60,21 +58,30 @@ const ViewRecipe = () => {
             messages: [
               {
                 role: 'system',
-                content: `You are a recipe generator. Create a recipe based on the provided ingredients.
-                If the ingredients are insufficient, respond with: "Not enough ingredients to make a dish."`,
+                content: `You are a recipe generator. Generate a recipe using the provided ingredients.
+              
+              ONLY add additional ingredients if the provided ingredients are NOT enough to make any kind of reasonable dish.
+              For example, if the provided ingredients are just salt and pepper, you should add additional ingredients to make an actual dish.
+              
+              If additional ingredients are needed, clearly label them as "(additional)" and keep them minimal and logical.
+              
+              If the given ingredients are enough to make a real dish, DO NOT add anything else.
+              
+              Return the recipe in the following JSON format:
+              {
+                "recipe": "Name of the recipe",
+                "cookingTime": "Time range (e.g., 30-45 minutes)",
+                "difficulty": "Easy / Medium / Hard",
+                "ingredients": [array of strings; label additions with '(additional)'],
+                "instructions": [array of steps]
+              }`
               },
               {
                 role: 'user',
-                content: `Generate a recipe using these ingredients: ${ingredients}. Note: The following corrections or missing ingredients IF provided: ${userInput}.
-                 Return the output in a JSON like this: 
-                 {
-                  "recipe": "Name of the recipe here", 
-                  "cookingTime": "Estimated cooking time range here (Ex: 30-45 minutes)", 
-                  "difficulty": "Difficulty level here (Easy / Medium / Hard)",
-                  "ingredients": [list of ingredients in array],
-                  "instructions": [list of instructions in array]
-                 }`,
-              },
+                content: `Ingredients: ${ingredients}.
+              Notes or corrections (if any): ${userInput}`
+              }
+              
             ],
           }),
         });
@@ -83,47 +90,7 @@ const ViewRecipe = () => {
         if (!response.ok) throw new Error(data.error?.message || 'Failed to generate recipe.');
 
         const reply = data.choices?.[0]?.message?.content;
-
-        if (reply?.toLowerCase().includes('not enough ingredients')) {
-          setInsufficientIngredients(true);
-
-          const recommendationResponse = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              Authorization: `Bearer ${apiKey}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              model: 'gpt-4.1-nano',
-              messages: [
-                {
-                  role: 'system',
-                  content: 'You are a recipe generator. Recommend a recipe with additional ingredients.',
-                },
-                {
-                  role: 'user',
-                  content: `The ingredients provided (${ingredients}) are insufficient to make a dish. Recommend a recipe with additional ingredients that can make a complete dish.
-                    Return the output in a JSON like this: 
-                    {
-                      "recipe": "Name of the recipe here", 
-                      "cookingTime": "Estimated cooking time range here (Ex: 30-45 minutes)", 
-                      "difficulty": "Difficulty level here (Easy / Medium / Hard)",
-                      "ingredients": [list of ingredients in array, but (additional) in front of additional ingredients],
-                      "instructions": [list of instructions in array]
-                    }`,
-                },
-              ],
-            }),
-          });
-
-          const recommendationData = await recommendationResponse.json();
-          if (!recommendationResponse.ok) throw new Error(recommendationData.error?.message || 'Failed to recommend a recipe.');
-
-          const recommendationReply = recommendationData.choices?.[0]?.message?.content;
-          setRecipeData(JSON.parse(recommendationReply)); 
-        } else {
-          setRecipeData(JSON.parse(reply)); 
-        }
+        setRecipeData(JSON.parse(reply));
       } catch (e: any) {
         console.error(e);
         setError('Failed to generate recipe.');
@@ -137,14 +104,14 @@ const ViewRecipe = () => {
 
   const saveRecipe = async () => {
     if (!recipeData) return;
-  
+
     try {
       const savedRecipes = JSON.parse((await AsyncStorage.getItem('savedRecipes')) || '[]');
       const newRecipe = {
         id: Date.now(),
-        content: formatRecipe(recipeData), 
+        content: recipeData,
       };
-  
+
       await AsyncStorage.setItem('savedRecipes', JSON.stringify([...savedRecipes, newRecipe]));
       alert('Recipe saved successfully!');
       nav.navigate('SavedRecipes');
@@ -181,37 +148,33 @@ const ViewRecipe = () => {
         </>
       ) : error ? (
         <MyText>{error}</MyText>
-      ) : insufficientIngredients ? (
-        <MyText>No sufficient ingredients to generate a recipe.</MyText>
       ) : recipeData ? (
-        <ScrollView style={styles.recipeContainer} contentContainerStyle={{paddingBottom: '10%'}}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',width:"100%"}}>
+        <ScrollView style={styles.recipeContainer} contentContainerStyle={{ paddingBottom: '10%' }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
             <MyText bold fontSize='large'>Enjoy!</MyText>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
               <Icon name='copy' type='feather' onPress={copyToClipboard} />
               <Icon name="share" type='entypo' onPress={shareRecipe} />
             </View>
           </View>
-          <MyText style={{marginVertical:"1%"}}>Recipe: {recipeData.recipe}</MyText>
-          <View style = {{marginTop:"3%"}}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap:'2%' }}>
+          <MyText style={{ marginVertical: "1%" }}>Recipe: {recipeData.recipe}</MyText>
+          <View style={{ marginTop: "3%" }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: '2%' }}>
               <Icon name='clock' type='feather' size={18} />
               <MyText fontSize="small">Cooking Time: {recipeData.cookingTime}</MyText>
             </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap:'2%' }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: '2%' }}>
               <Icon name='flame' type='ionicon' size={18} />
               <MyText fontSize="small">Difficulty: {recipeData.difficulty}</MyText>
             </View>
           </View>
           <MyText bold style={{ marginTop: "3%" }}>Ingredients:</MyText>
           {recipeData.ingredients.map((ingredient: string, index: number) => (
-            <MyText style={{marginVertical:"1%"}} key={index}>• {ingredient}</MyText>
+            <MyText style={{ marginVertical: "1%" }} key={index}>• {ingredient}</MyText>
           ))}
-          <MyText bold style={{ marginTop: "3%" }}>
-            Instructions:
-          </MyText>
+          <MyText bold style={{ marginTop: "3%" }}>Instructions:</MyText>
           {recipeData.instructions.map((instruction: string, index: number) => (
-            <MyText style={{marginVertical:"1%"}} key={index}>{index + 1}. {instruction}</MyText>
+            <MyText style={{ marginVertical: "1%" }} key={index}>{index + 1}. {instruction}</MyText>
           ))}
         </ScrollView>
       ) : (
@@ -219,7 +182,7 @@ const ViewRecipe = () => {
       )}
       {recipeData && (
         <View style={styles.bottomButtons}>
-          <MyText style={{ color: 'gray', transform: [{ scale: 0.8 }] }} fontSize={3} textAlign="center">
+          <MyText color='gray' style={{ transform: [{ scale: 0.8 }] }} fontSize={3} textAlign="center">
             ⚠️ Recipes are AI-generated. Always double-check ingredients and instructions.
           </MyText>
           <MyButton style={{ marginTop: '2.5%' }} title="Thanks!" onPress={() => nav.navigate('IngredientsInput')} />

@@ -1,15 +1,17 @@
-import { View, StyleSheet, Text, Alert } from 'react-native';
+import { View, StyleSheet, Text } from 'react-native';
 import React, { useRef, useState } from 'react';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import IconButton from '../components/IconButton';
-import { SafeAreaView, TouchableOpacity } from 'react-native';
+import { SafeAreaView } from 'react-native';
 import InfoModal from '../components/InfoModal';
 import MyText from '../components/MyText';
+import MyButton from '../components/MyButton';
 
 const IngredientsInput = () => {
   const nav = useNavigation();
+  const isFocused = useIsFocused();
   const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const [cameraType, setCameraType] = useState<CameraType>('back');
   const cameraRef = useRef<any>(null);
@@ -31,7 +33,6 @@ const IngredientsInput = () => {
 
   const uploadFromLibrary = async () => {
     const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-
     if (!permissionResult.granted) {
       alert('Permission required to access library!');
       return;
@@ -59,24 +60,21 @@ const IngredientsInput = () => {
   if (!cameraPermission.granted) {
     return (
       <SafeAreaView style={styles.center}>
-        <MyText>Camera permission is required to use this feature.</MyText>
-        <TouchableOpacity
-          style={{backgroundColor: '#007BFF', padding: 15, borderRadius: 8,}}
-          onPress={requestCameraPermission}
-        >
-          <MyText>Grant Permission</MyText>
-        </TouchableOpacity>
+        <MyText style={{marginVertical:"3%"}} textAlign='center'>Camera permission is required to use this feature.</MyText>
+        <MyButton width={"50%"} title='Grant Permission' onPress={requestCameraPermission} />
       </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView style={styles.container}>
-      <CameraView
-        style={StyleSheet.absoluteFill}
-        facing={cameraType}
-        ref={cameraRef}
-      />
+      {isFocused && (
+        <CameraView
+          style={StyleSheet.absoluteFill}
+          facing={cameraType}
+          ref={cameraRef}
+        />
+      )}
       <View style={styles.controls}>
         <IconButton iconName="camera" onPress={takePicture} />
         <View>

@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View, Image, ActivityIndicator } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import { StyleSheet,  Image, ActivityIndicator } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/native';
 import Page from '../components/Page';
 import MyText from '../components/MyText';
@@ -16,7 +16,7 @@ const VerifyIngredients = () => {
   const [noIngredientsFound, setNoIngredientsFound] = useState(false); 
 
   useFocusEffect(
-    React.useCallback(() => {
+    useCallback(() => {
       setLoading(false);
       setError(null);
       setNoIngredientsFound(false);
@@ -91,9 +91,8 @@ const VerifyIngredients = () => {
         <MyText>{error}</MyText>
       ) : noIngredientsFound ? ( 
         <>
-          <MyText style={{ marginVertical: '5%' }}>
-            No food ingredients were found in this image. 
-            Please try again.
+          <MyText textAlign='center' style={{ marginVertical: '5%' }}>
+            No food ingredients were found. Please upload another image.
           </MyText>
           <MyButton width="100%" title="Back" onPress={handleCancel} />
         </>

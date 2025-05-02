@@ -1,11 +1,14 @@
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
-import React, { useState } from 'react';
+import React from 'react';
 import Page from '../components/Page';
 import MyText from '../components/MyText';
 import { Icon } from '@rneui/base';
 import { useNavigation } from '@react-navigation/native';
 import AppVersion from '../constants/AppVersion';
 import { Dropdown } from 'react-native-element-dropdown';
+import { useTranslation } from 'react-i18next';
+import i18n from '../localization/il18n';
+import { useTheme } from '../context/ThemeContext';
 
 const settingsSection = (
   sectionTitle: string,
@@ -13,28 +16,11 @@ const settingsSection = (
   iconType: string,
   subtitle?: string,
   touch?: boolean,
-  onPress?: () => void
+  onPress?: () => void,
+  dropdownData?: { label: string; value: string }[],
+  dropdownValue?: string,
+  onDropdownChange?: (value: string) => void
 ) => {
-  const [dropdownValue, setDropdownValue] = useState(null);
-  const dropdownData =
-    sectionTitle === 'Theme'
-      ? [
-          { label: 'Light', value: 'light' },
-          { label: 'Dark', value: 'dark' },
-          { label: 'System', value: 'system' },
-        ]
-      : sectionTitle === 'Language'
-      ? [
-          { label: 'English', value: 'en' },
-          { label: 'Spanish', value: 'es' },
-          { label: 'French', value: 'fr' },
-          { label: 'Arabic', value: 'ar' },
-          { label: 'Portuguese', value: 'pt' },
-          { label: 'Russian', value: 'ru' },
-          { label: 'German', value: 'de' },
-        ]
-      : [];
-
   const Container = touch ? TouchableOpacity : View;
 
   return (
@@ -49,9 +35,7 @@ const settingsSection = (
           <MyText bold>{sectionTitle}</MyText>
           {subtitle && <MyText fontSize="small">{subtitle}</MyText>}
         </View>
-        {touch ? (
-          <Icon name="chevron-right" type="material" size={30} />
-        ) : dropdownData.length > 0 ? (
+        {dropdownData ? (
           <Dropdown
             style={styles.dropdown}
             data={dropdownData}
@@ -59,8 +43,10 @@ const settingsSection = (
             valueField="value"
             placeholder="Select"
             value={dropdownValue}
-            onChange={(item) => setDropdownValue(item.value)}
+            onChange={(item) => onDropdownChange?.(item.value)}
           />
+        ) : touch ? (
+          <Icon name="chevron-right" type="material" size={30} />
         ) : null}
       </View>
     </Container>
@@ -69,42 +55,84 @@ const settingsSection = (
 
 const Settings = () => {
   const nav = useNavigation();
+  const { t } = useTranslation();
+  const { theme, setTheme } = useTheme(); 
+
   return (
     <Page style={styles.container}>
       <View style={styles.topRow}>
         <Icon size={25} onPress={nav.goBack} name="arrow-back" />
         <MyText style={{ alignSelf: 'center' }} fontSize="large" bold>
-          App Settings
+          {t('screens.settings.title')}
         </MyText>
         <View />
       </View>
-      {settingsSection('Theme', 'sun', 'feather', 'Change your appearance', false)}
-      {settingsSection('Language', 'language', 'entypo', 'Pick your language', false)}
+
       {settingsSection(
-        'Privacy Policy / TOS',
+        t('screens.settings.language.title'),
+        'language',
+        'entypo',
+        t('screens.settings.language.subtitle'),
+        false,
+        undefined,
+        [
+          { label: t('screens.settings.language.options.en'), value: 'en' },
+          { label: t('screens.settings.language.options.es'), value: 'es' }
+        ],
+        i18n.language,
+        (lang) => i18n.changeLanguage(lang)
+      )}
+
+      {settingsSection(
+        t('screens.settings.theme.title'),
+        'sun',
+        'feather',
+        t('screens.settings.theme.subtitle'),
+        false,
+        undefined,
+        [
+          { label: t('screens.settings.theme.options.light'), value: 'light' },
+          { label: t('screens.settings.theme.options.dark'), value: 'dark' },
+          { label: t('screens.settings.theme.options.system'), value: 'system' }
+        ],
+        theme,
+        setTheme 
+      )}
+
+      {settingsSection(
+        t('screens.settings.privacy.title'),
         'privacy-tip',
         'material',
-        'View the privacy policy',
+        t('screens.settings.privacy.subtitle'),
         true,
         () => console.log('Privacy Policy pressed')
       )}
+
       {settingsSection(
-        'Rate and Review',
+        t('screens.settings.rate.title'),
         'star',
         'antdesign',
-        'Rate Resepi and leave a review',
+        t('screens.settings.rate.subtitle'),
         true,
         () => console.log('Rate and Review pressed')
       )}
+
       {settingsSection(
-        'Feedback',
+        t('screens.settings.feedback.title'),
         'mail',
         'antdesign',
-        'Give feedback for improvements',
+        t('screens.settings.feedback.subtitle'),
         true,
         () => console.log('Feedback pressed')
       )}
-      {settingsSection('Version', 'smartphone', 'material', `Version ${AppVersion}`, false)}
+
+      {settingsSection(
+        t('screens.settings.version.title'),
+        'smartphone',
+        'material',
+        t('screens.settings.version.value', { version: AppVersion }),
+        false
+      )}
     </Page>
   );
 };
@@ -133,7 +161,7 @@ const styles = StyleSheet.create({
   dropdown: {
     width: "30%",
     borderWidth: 1,
-    borderRadius:20,
+    borderRadius: 20,
     borderColor: '#ccc',
     paddingHorizontal: 10,
     paddingVertical: 5,

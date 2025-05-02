@@ -1,0 +1,46 @@
+{
+    "language": "Español",
+    "screens": {
+      "verify": {
+        "title": "Verificando Ingredientes",
+        "text": {}
+      },
+      "settings": {
+        "title": "Configuración de la App",
+        "language": {
+          "title": "Idioma",
+          "subtitle": "Elige tu idioma",
+          "options": {
+            "en": "Inglés",
+            "es": "Español"
+          }
+        },
+        "theme": {
+          "title": "Tema",
+          "subtitle": "Cambia tu apariencia",
+          "options": {
+            "light": "Claro",
+            "dark": "Oscuro",
+            "system": "Sistema"
+          }
+        },
+        "privacy": {
+          "title": "Política de Privacidad / TOS",
+          "subtitle": "Ver la política de privacidad"
+        },
+        "rate": {
+          "title": "Calificar y Reseñar",
+          "subtitle": "Califica Resepi y deja una reseña"
+        },
+        "feedback": {
+          "title": "Comentarios",
+          "subtitle": "Da sugerencias para mejoras"
+        },
+        "version": {
+          "title": "Versión",
+          "value": "Versión {{version}}"
+        }
+      }
+    }
+  }
+  

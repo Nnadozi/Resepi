@@ -1,5 +1,6 @@
 import { StyleSheet, Text, View, ViewStyle } from 'react-native'
 import React from 'react'
+import { useTheme } from '@react-navigation/native';
 
 interface MyTextProps {
   children: React.ReactNode
@@ -8,6 +9,7 @@ interface MyTextProps {
   maxWidth?: string;
   style?:ViewStyle
   textAlign?:string;
+  color?:string;
 }
 
 const fontSizes = {
@@ -17,13 +19,15 @@ const fontSizes = {
   XL: 30,
 }
 
-const MyText = ({ children, bold, fontSize = 'normal', maxWidth,style, textAlign }: MyTextProps) => {
-    return (
+const MyText = ({ children, bold, fontSize = 'normal', maxWidth,style, textAlign,color }: MyTextProps) => {
+    const {colors} = useTheme()
+     return (
       <Text style={[
         style,
         { fontSize: fontSizes[fontSize] }, 
         bold && { fontWeight: 'bold' },
-        {maxWidth:maxWidth},{textAlign:textAlign}
+        {maxWidth:maxWidth},{textAlign:textAlign},
+        {color:color || colors.text} 
         ]}>
         {children}
       </Text>

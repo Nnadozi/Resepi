@@ -1,20 +1,32 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-import MyText from './components/MyText';
+import React from 'react';
+import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { StatusBar } from 'react-native';
 import AuthNav from './navigation/AuthNav';
 import MainNav from './navigation/MainNav';
-import { NavigationContainer } from '@react-navigation/native';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
+import './localization/il18n';
+
+const AppContent = () => {
+  const { currentTheme } = useTheme();
+  const Stack = createNativeStackNavigator();
+
+  return (
+    <>
+      <NavigationContainer theme={currentTheme}>
+        <Stack.Navigator screenOptions={{ headerShown: false, gestureEnabled: false }}>
+          <Stack.Screen name="MainNav" component={MainNav} />
+          <Stack.Screen name="AuthNav" component={AuthNav} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </>
+  );
+};
 
 export default function App() {
-  const Stack = createNativeStackNavigator()
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false, gestureEnabled:false}}>
-        <Stack.Screen name='MainNav' component={MainNav} />
-        <Stack.Screen name='AuthNav' component={AuthNav} />
-      </Stack.Navigator>
-    </NavigationContainer>
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 }
-
