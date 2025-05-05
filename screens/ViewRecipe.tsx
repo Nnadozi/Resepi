@@ -1,4 +1,4 @@
-import { StyleSheet, View, ActivityIndicator, ScrollView, Share } from 'react-native';
+import { StyleSheet, View, ActivityIndicator, ScrollView, Share, Image } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Page from '../components/Page';
@@ -7,6 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Clipboard from 'expo-clipboard';
 import MyButton from '../components/MyButton';
 import { Icon } from '@rneui/base';
+import MyIcon from '../components/MyIcon';
 
 const apiKey = process.env.EXPO_PUBLIC_API_KEY;
 
@@ -153,18 +154,18 @@ const ViewRecipe = () => {
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
             <MyText bold fontSize='large'>Enjoy!</MyText>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-              <Icon name='copy' type='feather' onPress={copyToClipboard} />
-              <Icon name="share" type='entypo' onPress={shareRecipe} />
+              <MyIcon size={25} iconName='copy' iconType='feather' onPress={copyToClipboard} />
+              <MyIcon size={25} iconName="share" iconType='entypo' onPress={shareRecipe} />
             </View>
           </View>
           <MyText style={{ marginVertical: "1%" }}>Recipe: {recipeData.recipe}</MyText>
-          <View style={{ marginTop: "3%" }}>
+          <View style={{ marginTop: "2%" }}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: '2%' }}>
-              <Icon name='clock' type='feather' size={18} />
+              <MyIcon iconName='clock' iconType='feather' size={18} />
               <MyText fontSize="small">Cooking Time: {recipeData.cookingTime}</MyText>
             </View>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: '2%' }}>
-              <Icon name='flame' type='ionicon' size={18} />
+              <MyIcon iconName='flame' iconType='ionicon' size={18} />
               <MyText fontSize="small">Difficulty: {recipeData.difficulty}</MyText>
             </View>
           </View>
@@ -186,7 +187,7 @@ const ViewRecipe = () => {
             ⚠️ Recipes are AI-generated. Always double-check ingredients and instructions.
           </MyText>
           <MyButton style={{ marginTop: '2.5%' }} title="Thanks!" onPress={() => nav.navigate('IngredientsInput')} />
-          <MyButton iconName="save" style={{ marginTop: '2.5%' }} title="Save to History" onPress={saveRecipe} />
+          <MyButton iconName="save" style={{ marginTop: '3%' }} title="Save to History" onPress={saveRecipe} />
         </View>
       )}
     </Page>

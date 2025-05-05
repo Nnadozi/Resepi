@@ -6,9 +6,9 @@ import React, {
   useMemo,
   ReactNode,
 } from 'react';
-import { useColorScheme, Platform } from 'react-native';
+import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as NavigationBar from 'expo-navigation-bar';
+import * as SystemUI from 'expo-system-ui';
 import { MyLightTheme, MyDarkTheme } from '../constants/Colors';
 
 type ThemeType = 'light' | 'dark' | 'system';
@@ -22,41 +22,43 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  const [theme, setThemeState] = useState<ThemeType>('system');
   const systemTheme = useColorScheme();
+  const [theme, setThemeState] = useState<ThemeType>('system');
 
   useEffect(() => {
     const loadTheme = async () => {
       try {
         const savedTheme = await AsyncStorage.getItem('theme');
-        if (savedTheme) {
-          setThemeState(savedTheme as ThemeType);
+        if (savedTheme === 'light' || savedTheme === 'dark' || savedTheme === 'system') {
+          setThemeState(savedTheme);
+        } else {
+          setThemeState('system');
         }
       } catch (error) {
         console.error('Failed to load theme:', error);
+        setThemeState('system');
       }
     };
+
     loadTheme();
   }, []);
 
   useEffect(() => {
-    const updateNavigationBar = async () => {
-      if (Platform.OS !== 'android') return;
-
+    const updateSystemUI = async () => {
       const activeTheme = theme === 'system' ? systemTheme : theme;
-      const isDark = activeTheme === 'dark';
+      const backgroundColor =
+        activeTheme === 'dark'
+          ? MyDarkTheme.colors.background
+          : MyLightTheme.colors.background;
 
       try {
-        await NavigationBar.setBackgroundColorAsync(
-          isDark ? MyDarkTheme.colors.background : MyLightTheme.colors.background
-        );
-        await NavigationBar.setButtonStyleAsync(isDark ? 'light' : 'dark');
+        await SystemUI.setBackgroundColorAsync(backgroundColor);
       } catch (err) {
-        console.warn('Failed to style navigation bar:', err);
+        console.warn('Failed to set system UI background color:', err);
       }
     };
 
-    updateNavigationBar();
+    updateSystemUI();
   }, [theme, systemTheme]);
 
   const setTheme = async (newTheme: ThemeType) => {

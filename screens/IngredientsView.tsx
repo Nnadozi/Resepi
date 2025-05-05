@@ -1,11 +1,12 @@
 import { StyleSheet, View, FlatList, TextInput } from 'react-native';
 import React, { useState } from 'react';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, useTheme } from '@react-navigation/native';
 import Page from '../components/Page';
 import MyButton from '../components/MyButton';
 import MyText from '../components/MyText';
 
 const IngredientsView = () => {
+  const {colors} = useTheme()
   const nav = useNavigation();
   const route = useRoute();
   const { ingredients } = route.params || {};
@@ -30,8 +31,9 @@ const IngredientsView = () => {
       <View style={styles.feedbackContainer}>
         <MyText style={{marginBottom:"2%"}} fontSize='small'>Is something wrong with the ingredients?</MyText>
         <TextInput
-          style={styles.textInput}
+          style={[styles.textInput,{color:colors.text,borderColor:colors.border}]}
           placeholder="Explain what's missing or incorrect..."
+          placeholderTextColor={"gray"}
           value={userInput}
           onChangeText={setUserInput}
           multiline
@@ -39,7 +41,7 @@ const IngredientsView = () => {
       </View>
       <View style={{ width: '100%', marginBottom: '3%' }}>
         <MyButton marginTop='2.5%' width="100%" title="Proceed" onPress={generateRecipe} />
-        <MyButton iconName='cancel' style={{marginTop:'2.5%'}} width="100%" title="Cancel" onPress={() => nav.navigate('IngredientsInput')} />
+        <MyButton iconName='cancel' style={{marginTop:'4%'}} width="100%" title="Cancel" onPress={() => nav.navigate('IngredientsInput')} />
       </View>
     </Page>
   );
@@ -52,7 +54,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginTop: '7.5%',
-    marginBottom: '2%',
     paddingHorizontal: '5%',
   },
   feedbackContainer: {
@@ -66,7 +67,7 @@ const styles = StyleSheet.create({
     padding:"3%",
     fontSize: 16,
     width: '100%',
-    minHeight: "20%",
+    minHeight: "15%",
     textAlignVertical: 'top',
   },
   buttonRow: {

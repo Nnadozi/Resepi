@@ -45,7 +45,7 @@ const VerifyIngredients = () => {
               {
                 role: 'user',
                 content: [
-                  { type: 'text', text: 'List the food ingredients shown in this image. Only output a simple comma-separated list, no explanations.' },
+                  { type: 'text', text: 'List the food ingredients shown in this image (or within an image). Only output a simple comma-separated list, no explanations.' },
                   { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${base64}` } },
                 ],
               },

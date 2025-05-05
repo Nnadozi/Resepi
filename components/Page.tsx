@@ -17,8 +17,9 @@ const Page = (props: PageProps) => {
     <StatusBar style={currentTheme.dark ? "light" : "dark"} />
     <SafeAreaView  style={[
       styles.con, 
-      { padding: props.padding || defaultPadding},
       props.style, 
+      { padding: props.padding || defaultPadding},
+      {backgroundColor:currentTheme.colors.background}
       ]}>
         {props.children}
     </SafeAreaView>

@@ -1,5 +1,5 @@
-import { View, StyleSheet, Text } from 'react-native';
-import React, { useRef, useState } from 'react';
+import { View, StyleSheet, Text, Platform } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
 import { CameraView, CameraType, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation, useIsFocused } from '@react-navigation/native';
@@ -8,6 +8,8 @@ import { SafeAreaView } from 'react-native';
 import InfoModal from '../components/InfoModal';
 import MyText from '../components/MyText';
 import MyButton from '../components/MyButton';
+import { StatusBar } from 'expo-status-bar';
+import * as SystemUI from "expo-system-ui"
 
 const IngredientsInput = () => {
   const nav = useNavigation();
@@ -16,6 +18,12 @@ const IngredientsInput = () => {
   const [cameraType, setCameraType] = useState<CameraType>('back');
   const cameraRef = useRef<any>(null);
   const [isInfoModalVisible, setIsInfoModalVisible] = useState(false);
+
+  useEffect(() => {
+    if (Platform.OS === 'android' && isFocused) {
+      SystemUI.setBackgroundColorAsync('transparent');
+    }
+  }, [isFocused]);
 
   const takePicture = async () => {
     if (cameraRef.current) {
@@ -68,6 +76,7 @@ const IngredientsInput = () => {
 
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar translucent backgroundColor="transparent" style='auto' />
       {isFocused && (
         <CameraView
           style={StyleSheet.absoluteFill}

@@ -1,6 +1,7 @@
 import { StyleSheet, ViewStyle } from 'react-native';
 import React from 'react';
 import { Button } from '@rneui/base';
+import { useTheme } from '@react-navigation/native';
 
 interface MyButtonProps {
   title?: string;
@@ -18,16 +19,17 @@ interface MyButtonProps {
 
 const MyButton = ({ title, onPress, disabled, size = 'lg', width = "100%", 
   style,iconName,iconType, marginTop, marginBottom, marginVertical }: MyButtonProps) => {
+  const {colors} = useTheme()
   return (
     <Button
       onPress={onPress}
       title={title}
       disabled={disabled}
       size={size}
-      buttonStyle={{ borderRadius: 20, backgroundColor: 'black' }} 
+      buttonStyle={{ borderRadius: 20, backgroundColor: colors.primary }} 
       containerStyle={[{ width, marginTop, marginBottom, marginVertical },style]}
-      titleStyle={{ fontSize: 15 }}
-      icon={iconName && iconType ? { name: iconName, type: iconType, color: 'white', size: 15 } : null}
+      titleStyle={{ fontSize: 16,color:colors.background }}
+      icon={iconName && iconType ? { name: iconName, type: iconType, color: colors.text, size: 15 } : null}
     />
   );
 };

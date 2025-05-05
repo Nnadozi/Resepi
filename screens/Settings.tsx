@@ -9,6 +9,7 @@ import { Dropdown } from 'react-native-element-dropdown';
 import { useTranslation } from 'react-i18next';
 import i18n from '../localization/il18n';
 import { useTheme } from '../context/ThemeContext';
+import MyIcon from '../components/MyIcon';
 
 const settingsSection = (
   sectionTitle: string,
@@ -22,7 +23,7 @@ const settingsSection = (
   onDropdownChange?: (value: string) => void
 ) => {
   const Container = touch ? TouchableOpacity : View;
-
+  const { currentTheme } = useTheme(); 
   return (
     <Container
       style={{ marginVertical: '5%' }}
@@ -30,15 +31,20 @@ const settingsSection = (
       onPress={touch ? onPress : undefined}
     >
       <View style={styles.sectionTitleRow}>
-        <Icon name={iconName} type={iconType} size={30} />
+        <MyIcon iconName={iconName} iconType={iconType} size={30} />
         <View style={{ flex: 1, marginLeft: '3%' }}>
           <MyText bold>{sectionTitle}</MyText>
           {subtitle && <MyText fontSize="small">{subtitle}</MyText>}
         </View>
         {dropdownData ? (
           <Dropdown
-            style={styles.dropdown}
+            style={[styles.dropdown,{backgroundColor:currentTheme.colors.border}]}
             data={dropdownData}
+            itemTextStyle={{color:currentTheme.colors.text}}
+            itemContainerStyle={{backgroundColor:currentTheme.colors.card}}
+            selectedTextStyle={{color:currentTheme.colors.text}}
+            activeColor={currentTheme.colors.border}
+            containerStyle={{borderWidth:0}}
             labelField="label"
             valueField="value"
             placeholder="Select"
@@ -61,7 +67,7 @@ const Settings = () => {
   return (
     <Page style={styles.container}>
       <View style={styles.topRow}>
-        <Icon size={25} onPress={nav.goBack} name="arrow-back" />
+        <MyIcon size={28} onPress={nav.goBack} iconName="arrow-back" />
         <MyText style={{ alignSelf: 'center' }} fontSize="large" bold>
           {t('screens.settings.title')}
         </MyText>
@@ -160,10 +166,9 @@ const styles = StyleSheet.create({
   },
   dropdown: {
     width: "30%",
-    borderWidth: 1,
     borderRadius: 20,
     borderColor: '#ccc',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    paddingHorizontal: "3%",
+    paddingVertical: "2%",
   },
 });

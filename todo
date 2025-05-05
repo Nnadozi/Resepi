@@ -1,7 +1,10 @@
-1. Try serverless functions / local ai (With Sumitt as well)
-
-- finish localization (add more languages + add language detection logic)
-- Finshing themeing (disable on camera screen)
+NEXT STEPS
+- Serverless functions (With Sumitt as well)
+- Next steps (more features + publish? see google doc)
 - Polish UI
-- Next steps (more features + publish?)
+- Fix bug endpoints
+- Icon and splash screen
+- finish localization + add more languages
+- Add GIF
+- Better prompts
 

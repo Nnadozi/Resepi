@@ -3,6 +3,8 @@ import React from 'react';
 import MyText from './MyText';
 import IconButton from './IconButton';
 import { Divider, Icon } from '@rneui/base';
+import { useTheme } from '@react-navigation/native';
+import MyIcon from './MyIcon';
 
 const iconData = [
   { iconName: 'camera', title: 'Camera', description: 'Snap a picture of some ingredients' },
@@ -12,48 +14,50 @@ const iconData = [
   { iconName: 'settings', title: 'Settings', description: 'Adjust app settings' },
 ];
 
-const InfoModal = ({ visible, onClose }) => (
-  <Modal
-    animationType="fade"
-    transparent={true}
-    visible={visible}
-    onRequestClose={onClose}
-  >
-    <View style={styles.modalOverlay}>
-      <View style={styles.modalContent}>
-        <View style={styles.topRow}>
-          <Icon name='close' onPress={onClose} />
-          <MyText bold fontSize='large'>Instructions</MyText>
-          <View/> 
-        </View>
-        <Divider style={{ width: '100%', marginVertical: '2%' }} />
-        {iconData.map(({ iconName, title, description }) => (
-          <View key={iconName} style={styles.itemCon}>
-            <IconButton scale={0.8} iconName={iconName} />
-            <View style={styles.textContainer}>
-              <MyText bold>{title}</MyText>
-              <MyText fontSize="small">{description}</MyText>
-            </View>
+const InfoModal = ({ visible, onClose }) => {
+  const { colors } = useTheme(); 
+  return (
+    <Modal
+      animationType="fade"
+      transparent={true}
+      visible={visible}
+      onRequestClose={onClose}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={[styles.modalContent,{backgroundColor:colors.background}]}>
+          <View style={styles.topRow}>
+            <MyIcon iconName='close' onPress={onClose} />
+            <MyText bold fontSize='large'>Instructions</MyText>
+            <View/>
           </View>
-        ))}
+          <Divider style={{ width: '100%', marginVertical: '2%' }} />
+          {iconData.map(({ iconName, title, description }) => (
+            <View key={iconName} style={styles.itemCon}>
+              <IconButton scale={0.8} iconName={iconName} />
+              <View style={styles.textContainer}>
+                <MyText bold>{title}</MyText>
+                <MyText fontSize="small">{description}</MyText>
+              </View>
+            </View>
+          ))}
+        </View>
       </View>
-    </View>
-  </Modal>
-);
+    </Modal>
+  );
+};
 
 export default InfoModal;
 
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.25)',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   modalContent: {
     width: '90%',
     padding: '3%',
-    backgroundColor: 'white',
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
