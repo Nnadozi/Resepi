@@ -79,7 +79,9 @@ const VerifyIngredients = () => {
 
   return (
     <Page>
-      <MyText bold fontSize="large">Verifying Ingredients...</MyText>
+      {loading && (
+       <MyText bold fontSize="large">Verifying Ingredients...</MyText>
+      )}
       {imageUri ? (
         <Image source={{ uri: imageUri }} style={styles.image} />
       ) : (
@@ -88,7 +90,12 @@ const VerifyIngredients = () => {
       {loading ? (
         <ActivityIndicator size="large" color="#5b9ef0" style={{ marginTop: '7.5%', transform: [{ scale: 1.25 }] }} />
       ) : error ? (
-        <MyText>{error}</MyText>
+        <>
+        <MyText textAlign="center" style={{ marginVertical: '5%' }}>
+          An error occurred: {error}
+        </MyText>
+        <MyButton width="100%" title="Back" onPress={handleCancel} />
+        </>
       ) : noIngredientsFound ? ( 
         <>
           <MyText textAlign='center' style={{ marginVertical: '5%' }}>
@@ -105,7 +112,7 @@ export default VerifyIngredients;
 
 const styles = StyleSheet.create({
   image: {
-    width: '90%',
+    width: '95%',
     height: undefined,
     resizeMode: 'cover',
     aspectRatio: 1,

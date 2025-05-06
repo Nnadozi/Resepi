@@ -10,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import i18n from '../localization/il18n';
 import { useTheme } from '../context/ThemeContext';
 import MyIcon from '../components/MyIcon';
+import {Image} from "expo-image"
 
 const settingsSection = (
   sectionTitle: string,
@@ -73,7 +74,6 @@ const Settings = () => {
         </MyText>
         <View />
       </View>
-
       {settingsSection(
         t('screens.settings.language.title'),
         'language',

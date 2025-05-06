@@ -6,6 +6,7 @@ import Page from '../components/Page';
 import { useNavigation } from '@react-navigation/native';
 import RecipePreview from '../components/RecipePreview';
 import MyIcon from '../components/MyIcon';
+import { Image } from '@rneui/base/dist/Image/Image';
 
 const SavedRecipes = () => {
   const [recipes, setRecipes] = useState([]);

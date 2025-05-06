@@ -24,7 +24,7 @@ const InfoModal = ({ visible, onClose }) => {
       onRequestClose={onClose}
     >
       <View style={styles.modalOverlay}>
-        <View style={[styles.modalContent,{backgroundColor:colors.background}]}>
+        <View style={[styles.modalContent,{backgroundColor:colors.card}]}>
           <View style={styles.topRow}>
             <MyIcon iconName='close' onPress={onClose} />
             <MyText bold fontSize='large'>Instructions</MyText>

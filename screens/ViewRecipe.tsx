@@ -1,4 +1,4 @@
-import { StyleSheet, View, ActivityIndicator, ScrollView, Share, Image } from 'react-native';
+import { StyleSheet, View, ActivityIndicator, ScrollView, Share } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Page from '../components/Page';
@@ -8,6 +8,7 @@ import * as Clipboard from 'expo-clipboard';
 import MyButton from '../components/MyButton';
 import { Icon } from '@rneui/base';
 import MyIcon from '../components/MyIcon';
+import {Image} from  "expo-image"
 
 const apiKey = process.env.EXPO_PUBLIC_API_KEY;
 
@@ -144,11 +145,16 @@ const ViewRecipe = () => {
     <Page>
       {loading ? (
         <>
-          <MyText bold>{randomPhrase}</MyText>
-          <ActivityIndicator size="large" color="#5b9ef0" style={{ marginVertical: '5%' }} />
+          <Image contentFit='contain' style={{ height:"15%",width: '100%',}} source={require('../assets/loading.gif')} />
+          <MyText style={{marginVertical:"2.5%"}} bold>{randomPhrase}</MyText>
         </>
       ) : error ? (
-        <MyText>{error}</MyText>
+        <>
+          <MyText textAlign="center" style={{ marginVertical: '5%' }}>
+            An error occurred: {error}
+          </MyText>
+          <MyButton width="100%" title="Back" onPress={() => nav.goBack()} />
+        </>
       ) : recipeData ? (
         <ScrollView style={styles.recipeContainer} contentContainerStyle={{ paddingBottom: '10%' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
@@ -179,7 +185,12 @@ const ViewRecipe = () => {
           ))}
         </ScrollView>
       ) : (
-        <MyText>No ingredients provided.</MyText>
+        <>
+          <MyText textAlign="center" style={{ marginVertical: '5%' }}>
+            No ingredients provided. Please go back and try again.
+          </MyText>
+          <MyButton width="100%" title="Back" onPress={() => nav.goBack()} />
+        </>
       )}
       {recipeData && (
         <View style={styles.bottomButtons}>

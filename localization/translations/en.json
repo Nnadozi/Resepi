@@ -40,6 +40,34 @@
           "title": "Version",
           "value": "Version {{version}}"
         }
+      },
+      "ingredients":{
+
+      },
+      "viewRecipe":{
+
+      },
+      "savedRecipes":{
+
+      },
+      "viewSavedRecipe":{
+
+      },
+      "info":{
+
+      }
+    },
+    "alerts":{
+      "saveRecipe":{
+
+      },
+      "confirmDeletion":{
+
+      }
+    },
+    "other":{
+      "warning":{
+        
       }
     }
   }
