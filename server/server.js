@@ -1,19 +1,21 @@
 import express, { json as _json } from 'express';
 import cors from 'cors';
 import { config } from 'dotenv';
-import { Configuration, OpenAIApi } from 'openai';
+import OpenAI from 'openai';
 
 config();
 const app = express();
 app.use(cors());
 app.use(_json());
 
-const openai = new OpenAIApi(new Configuration({ apiKey: process.env.OPENAI_API_KEY }));
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 app.post('/analyze-image', async (req, res) => {
   const { base64 } = req.body;
   try {
-    const completion = await openai.createChatCompletion({
+    const completion = await openai.chat.completions.create({
       model: 'gpt-4o-mini',
       messages: [
         {
@@ -31,7 +33,7 @@ app.post('/analyze-image', async (req, res) => {
       ],
     });
 
-    const reply = completion.data.choices[0].message.content;
+    const reply = completion.choices[0].message.content;
     res.json({ reply });
   } catch (err) {
     console.error(err);
@@ -42,12 +44,12 @@ app.post('/analyze-image', async (req, res) => {
 app.post('/generate-recipe', async (req, res) => {
   const { ingredients, userInput } = req.body;
   try {
-    const completion = await openai.createChatCompletion({
+    const completion = await openai.chat.completions.create({
       model: 'gpt-4.1-nano',
       messages: [
         {
           role: 'system',
-          content:  `You are a recipe generator. Generate a recipe using the provided ingredients.
+          content: `You are a recipe generator. Generate a recipe using the provided ingredients.
               
               ONLY add additional ingredients if the provided ingredients are NOT enough to make any kind of reasonable dish.
               For example, if the provided ingredients are just salt and pepper, you should add additional ingredients to make an actual dish.
@@ -64,7 +66,6 @@ app.post('/generate-recipe', async (req, res) => {
                 "ingredients": [array of strings; label additions with '(additional)'],
                 "instructions": [array of steps]
               }`
-        ,
         },
         {
           role: 'user',
@@ -73,7 +74,7 @@ app.post('/generate-recipe', async (req, res) => {
       ],
     });
 
-    const json = JSON.parse(completion.data.choices[0].message.content);
+    const json = JSON.parse(completion.choices[0].message.content);
     res.json(json);
   } catch (err) {
     console.error(err);
