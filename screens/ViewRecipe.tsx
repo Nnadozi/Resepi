@@ -8,7 +8,7 @@ import * as Clipboard from 'expo-clipboard';
 import MyButton from '../components/MyButton';
 import { Icon } from '@rneui/base';
 import MyIcon from '../components/MyIcon';
-import {Image} from  "expo-image"
+import { Image } from "expo-image";
 
 const apiKey = process.env.EXPO_PUBLIC_API_KEY;
 
@@ -45,30 +45,38 @@ const ViewRecipe = () => {
 
   useEffect(() => {
     const generateRecipe = async () => {
-      if (!ingredients) return;
+  if (!ingredients) return;
 
-      setLoading(true);
-      try {
-        const response = await fetch('https://resepi-ss25.onrender.com/generate-recipe', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ingredients, userInput }),
-      });
+  setLoading(true);
+  setError(null);
+  try {
+    const response = await fetch('https://resepi-ss25.onrender.com/generate-recipe', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ ingredients, userInput }),
+    });
 
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.error?.message || 'Failed to generate recipe.');
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Failed to generate recipe');
+    }
 
-        const reply = data.choices?.[0]?.message?.content;
-        setRecipeData(JSON.parse(reply));
-      } catch (e: any) {
-        console.error(e);
-        setError('Failed to generate recipe.');
-      } finally {
-        setLoading(false);
-      }
-    };
+    const data = await response.json();
+
+    if (!data.recipe || !data.ingredients || !data.instructions) {
+      throw new Error('Invalid recipe format received');
+    }
+
+    setRecipeData(data);
+  } catch (e: any) {
+    console.error('Recipe generation error:', e);
+    setError(e.message || 'Failed to generate recipe. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
 
     generateRecipe();
   }, [ingredients, userInput]);
@@ -114,8 +122,8 @@ const ViewRecipe = () => {
     <Page>
       {loading ? (
         <>
-          <Image contentFit='contain' style={{ height:"15%",width: '100%',}} source={require('../assets/loading.gif')} />
-          <MyText style={{marginVertical:"2.5%"}} bold>{randomPhrase}</MyText>
+          <Image contentFit='contain' style={{ height:"15%",width: '100%' }} source={require('../assets/loading.gif')} />
+          <MyText style={{ marginVertical:"2.5%" }} bold>{randomPhrase}</MyText>
         </>
       ) : error ? (
         <>
