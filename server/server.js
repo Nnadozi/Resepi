@@ -6,7 +6,7 @@ import OpenAI from 'openai';
 config();
 const app = express();
 app.use(cors());
-app.use(_json());
+app.use(_json({ limit: '10mb' }))
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
