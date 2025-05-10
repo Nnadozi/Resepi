@@ -31,7 +31,7 @@ const IngredientsView = () => {
       <View style={styles.feedbackContainer}>
         <MyText style={{marginBottom:"2%"}} fontSize='small'>Is something wrong with the ingredients?</MyText>
         <TextInput
-          style={[styles.textInput,{color:colors.text,borderColor:colors.border}]}
+          style={[styles.textInput,{color:colors.text,borderColor:colors.border, backgroundColor:colors.border}]}
           placeholder="Explain what's missing or incorrect..."
           placeholderTextColor={"gray"}
           value={userInput}
