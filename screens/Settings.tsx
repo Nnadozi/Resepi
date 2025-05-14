@@ -75,21 +75,6 @@ const Settings = () => {
         <View />
       </View>
       {settingsSection(
-        t('screens.settings.language.title'),
-        'language',
-        'entypo',
-        t('screens.settings.language.subtitle'),
-        false,
-        undefined,
-        [
-          { label: t('screens.settings.language.options.en'), value: 'en' },
-          { label: t('screens.settings.language.options.es'), value: 'es' }
-        ],
-        i18n.language,
-        (lang) => i18n.changeLanguage(lang)
-      )}
-
-      {settingsSection(
         t('screens.settings.theme.title'),
         'sun',
         'feather',
@@ -104,34 +89,6 @@ const Settings = () => {
         theme,
         setTheme 
       )}
-
-      {settingsSection(
-        t('screens.settings.privacy.title'),
-        'privacy-tip',
-        'material',
-        t('screens.settings.privacy.subtitle'),
-        true,
-        () => console.log('Privacy Policy pressed')
-      )}
-
-      {settingsSection(
-        t('screens.settings.rate.title'),
-        'star',
-        'antdesign',
-        t('screens.settings.rate.subtitle'),
-        true,
-        () => console.log('Rate and Review pressed')
-      )}
-
-      {settingsSection(
-        t('screens.settings.feedback.title'),
-        'mail',
-        'antdesign',
-        t('screens.settings.feedback.subtitle'),
-        true,
-        () => console.log('Feedback pressed')
-      )}
-
       {settingsSection(
         t('screens.settings.version.title'),
         'smartphone',

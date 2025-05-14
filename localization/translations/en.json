@@ -12,7 +12,12 @@
           "subtitle": "Pick your language",
           "options": {
             "en": "English",
-            "es": "Español"
+            "es": "Español",
+            "fr": "Français",
+            "de": "Deutsch",
+            "it": "Italiano",
+            "pt": "Português",
+            "ru": "Русский"
           }
         },
         "theme": {
@@ -47,8 +52,13 @@
       "viewRecipe":{
 
       },
-      "savedRecipes":{
-
+      "savedRecipes": {
+        "title": "Saved Recipes",
+        "empty": "You haven't saved any recipes yet.",
+        "deleteTitle": "Delete Recipe",
+        "deleteMessage": "Are you sure you want to delete this recipe?",
+        "cancel": "Cancel",
+        "delete": "Delete"
       },
       "viewSavedRecipe":{
 
