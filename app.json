@@ -23,7 +23,8 @@
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
-      ]
+      ],
+      "package": "com.nnadozi.Resepi"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -43,7 +44,9 @@
           "photosPermission": "The app accesses your photos to let you share them with your friends."
         }
       ],
-      ["expo-localization"]
+      [
+        "expo-localization"
+      ]
     ],
     "extra": {
       "eas": {
