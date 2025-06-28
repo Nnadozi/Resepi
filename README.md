@@ -8,7 +8,7 @@ A mobile app that allows you to take a picture of some ingredients and get a rec
 - Advanced cutting-edge AI photo detection
 
 ## Built With
-React Native, Expo, TypeScript, NodeJS
+React Native, Expo, TypeScript, NodeJS, Express.js 
 
 ## Pictures
 <img src="https://github.com/user-attachments/assets/461128d6-8b46-4bee-9095-2ca57ad141c8" alt="1" width="200"/>
